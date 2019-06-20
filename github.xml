@@ -1,0 +1,7 @@
+<application>
+  <component name="GithubAccounts">
+    <account id="9310a353-f3e8-4151-8baa-f4091f4ec2f1" name="cyanures">
+      <server host="github.com" />
+    </account>
+  </component>
+</application>
