@@ -1,6 +1,7 @@
 package com.ginko.Compte
 
 import android.content.Intent
+import android.graphics.Color
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Parcel
@@ -31,6 +32,8 @@ class CompteDetailActivity() : AppCompatActivity() {
     private lateinit var database: Database
     lateinit var adapter: OperationAdapter
     private lateinit var operations: MutableList<Operation>
+    private lateinit var compteDetail: TextView
+    private lateinit var soldeDetail: TextView
 
     constructor(parcel: Parcel) : this() {
         compte = parcel.readParcelable(Compte::class.java.classLoader)
@@ -44,25 +47,51 @@ class CompteDetailActivity() : AppCompatActivity() {
         //Récupération du compte sur lequel on est
         compte = intent.getParcelableExtra<Compte>(EXTRA_COMPTE)
 
+        MaJListeOperations()
 
-        //recycle view
+
+        /*recycle view
         operations = database.getOperations(compte.idCompte)
         adapter = OperationAdapter(operations, null)
         val recyclerView = findViewById<RecyclerView>(R.id.OperationRecyclerView)
         recyclerView.layoutManager = LinearLayoutManager(this)
         recyclerView.adapter = adapter
-        //
+        */
 
 
         //Récupération du FAB et passage de l'action lors du clic
         val fab = findViewById<FloatingActionButton>(R.id.fabOperation)
         fab.setOnClickListener { OpenCreateOperation() }
 
-        //Affichage du compte et du solde sur lequel on est
-        findViewById<TextView>(R.id.nomCompteDetail).text = compte.nomCompte
-        findViewById<TextView>(R.id.soldeCompteDetail).text = compte.solde.toString() + " €"
 
 
+
+
+    }
+
+    private fun MaJListeOperations() {
+        operations = database.getOperations(compte.idCompte)
+        adapter = OperationAdapter(operations, null)
+        val recyclerView = findViewById<RecyclerView>(R.id.OperationRecyclerView)
+        recyclerView.layoutManager = LinearLayoutManager(this)
+        recyclerView.adapter = adapter
+
+        compteDetail = findViewById(R.id.nomCompteDetail)
+        compteDetail.text = compte.nomCompte
+
+        soldeDetail = findViewById(R.id.soldeCompteDetail)
+        soldeDetail.text = compte.solde.toString()
+
+        //rafraichissement de la couleur du solde si celui-ci change après l'affectation d'une recette ou d'un dépense
+       if(soldeDetail.text.toString().toDouble() > 0){
+           soldeDetail.setTextColor(Color.GREEN)
+           soldeDetail.text = compte.solde.toString() + " €"
+
+        }
+        else{
+            soldeDetail.setTextColor(Color.RED)
+            soldeDetail.text = compte.solde.toString() + " €"
+        }
     }
 
 
@@ -96,6 +125,7 @@ class CompteDetailActivity() : AppCompatActivity() {
                 var operation = Operation(libOperationSaisie, montantOperationSaisie.toDouble(), compte.idCompte)
                 saveOperation(operation)
                 mAjSolde(operation)
+                MaJListeOperations()
 
             }
 

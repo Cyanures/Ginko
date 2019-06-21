@@ -22,6 +22,7 @@ class CompteAdapter(val comptes: List<Compte>, val itemClickListener: View.OnCli
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val viewItem = LayoutInflater.from(parent.context)
             .inflate(R.layout.item_compte, parent, false)
+        viewItem.findViewById<TextView>(R.id.soldeCompteDetail)
 
         return ViewHolder(viewItem)
     }
