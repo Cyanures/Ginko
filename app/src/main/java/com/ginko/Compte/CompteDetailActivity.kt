@@ -15,9 +15,6 @@ import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.util.Log
 import android.view.View
-import android.widget.EditText
-import android.widget.TextView
-import android.widget.Toast
 import com.ginko.App
 import com.ginko.Opérations.Operation
 import com.ginko.Opérations.OperationAdapter
@@ -25,7 +22,7 @@ import com.ginko.R
 import com.ginko.Database as Database
 import com.ginko.Compte.CompteActivity
 import android.icu.util.TimeZone
-import android.widget.DatePicker
+import android.widget.*
 import com.ginko.Opérations.TextViewDatePicker
 import kotlinx.android.synthetic.main.activity_operation_create.*
 import java.sql.Timestamp
@@ -114,7 +111,11 @@ class CompteDetailActivity() : AppCompatActivity() {
         val saisieLibOperation = view.findViewById<EditText>(R.id.saisieLibOperation)
         val saisieMontantOperation = view.findViewById<EditText>(R.id.saisieMontantOperation)
         val saisieDate = view.findViewById<EditText>(R.id.saisieDate)
-        val dateSaisie = TextViewDatePicker(context,saisieDate)
+        TextViewDatePicker(context,saisieDate)
+
+        val depense = view.findViewById<RadioButton>(R.id.checkboxDepense)
+        val recette = view.findViewById<RadioButton>(R.id.checkboxRecette)
+
 
 
 
@@ -123,9 +124,11 @@ class CompteDetailActivity() : AppCompatActivity() {
         //Bouton Ajouter
         builder.setPositiveButton(android.R.string.ok) { _, _ ->
             val libOperationSaisie = saisieLibOperation.text.toString()
-            val montantOperationSaisie = saisieMontantOperation.text.toString()
+            var montantOperationSaisie = saisieMontantOperation.text.toString()
             val dateOperationSaisie = saisieDate.text.toString()
             val date = SimpleDateFormat("dd-MM-yyyy").parse(dateOperationSaisie)
+
+
 
 
 
@@ -139,7 +142,10 @@ class CompteDetailActivity() : AppCompatActivity() {
                     "Creation Operation",
                     "Operation cree $libOperationSaisie montant : $montantOperationSaisie sur le compte ${compte.idCompte} date opération : $dateOperationSaisie"
                 )
-                val operation = Operation(libOperationSaisie, montantOperationSaisie.toDouble(),date.time, compte.idCompte)
+                if(depense.isChecked){
+                    montantOperationSaisie = (-saisieMontantOperation.text.toString().toDouble()).toString()
+                }
+                val operation = Operation(libOperationSaisie,montantOperationSaisie.toDouble(),date.time, compte.idCompte)
                 saveOperation(operation)
                 mAjSolde(operation)
                 MaJListeOperations()

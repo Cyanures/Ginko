@@ -13,13 +13,44 @@
             android:layout_height="wrap_content"
             android:hint="Libellé de l'opération"/>
 
+    <RadioGroup
+            android:id="@+id/groupeRadioBouton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/saisieLibOperation"
+            android:orientation="horizontal"
+    >
+
+        <RadioButton
+                android:id="@+id/checkboxDepense"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_marginLeft="40dp"
+                android:text="Dépense"
+                android:checked="true"
+                />
+
+        <RadioButton
+                android:id="@+id/checkboxRecette"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_marginLeft="50dp"
+                android:layout_marginRight="40dp"
+                android:text="Recette"
+        />
+
+
+
+
+    </RadioGroup>
+
     <EditText
             android:id="@+id/saisieMontantOperation"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Montant de l'operation"
-            android:inputType="numberDecimal|numberSigned"
-            android:layout_below="@+id/saisieLibOperation"
+            android:inputType="numberDecimal"
+            android:layout_below="@+id/groupeRadioBouton"
     />
 
     <EditText
