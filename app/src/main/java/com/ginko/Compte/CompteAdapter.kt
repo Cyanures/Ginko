@@ -32,7 +32,7 @@ class CompteAdapter(val comptes: List<Compte>, val itemClickListener: View.OnCli
         holder.cardView.setOnClickListener(itemClickListener)
         holder.cardView.tag = position
         holder.nomCompte.text = compte.nomCompte
-        holder.soldeCompte.text = compte.solde.toString() + " €"
+        holder.soldeCompte.setText("${compte.solde} €")
 
     }
 

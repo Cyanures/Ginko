@@ -47,17 +47,8 @@ class CompteDetailActivity() : AppCompatActivity() {
         //Récupération du compte sur lequel on est
         compte = intent.getParcelableExtra<Compte>(EXTRA_COMPTE)
 
+        //Récupération de la liste des opérations
         MaJListeOperations()
-
-
-        /*recycle view
-        operations = database.getOperations(compte.idCompte)
-        adapter = OperationAdapter(operations, null)
-        val recyclerView = findViewById<RecyclerView>(R.id.OperationRecyclerView)
-        recyclerView.layoutManager = LinearLayoutManager(this)
-        recyclerView.adapter = adapter
-        */
-
 
         //Récupération du FAB et passage de l'action lors du clic
         val fab = findViewById<FloatingActionButton>(R.id.fabOperation)
@@ -82,15 +73,15 @@ class CompteDetailActivity() : AppCompatActivity() {
         soldeDetail = findViewById(R.id.soldeCompteDetail)
         soldeDetail.text = compte.solde.toString()
 
-        //rafraichissement de la couleur du solde si celui-ci change après l'affectation d'une recette ou d'un dépense
+        //rafraichissement de la couleur du solde si celui-ci change après l'affectation d'une recette ou d'une dépense
        if(soldeDetail.text.toString().toDouble() > 0){
            soldeDetail.setTextColor(Color.GREEN)
-           soldeDetail.text = compte.solde.toString() + " €"
+           soldeDetail.setText("${compte.solde} €")
 
         }
         else{
             soldeDetail.setTextColor(Color.RED)
-            soldeDetail.text = compte.solde.toString() + " €"
+            soldeDetail.setText("${compte.solde} €")
         }
     }
 
@@ -101,13 +92,13 @@ class CompteDetailActivity() : AppCompatActivity() {
         val builder = AlertDialog.Builder(context)
         builder.setTitle("Ajouter un compte")
 
-        val view = layoutInflater.inflate(R.layout.activity_operation_create, null)
+        val view = layoutInflater.inflate(R.layout.activity_operation_create,null)
 
         val saisieLibOperation = view.findViewById<EditText>(R.id.saisieLibOperation)
         val saisieMontantOperation = view.findViewById<EditText>(R.id.saisieMontantOperation)
 
 
-        builder.setView(view);
+        builder.setView(view)
 
         // set up the ok button
         builder.setPositiveButton(android.R.string.ok) { _, _ ->
@@ -122,7 +113,7 @@ class CompteDetailActivity() : AppCompatActivity() {
                     "Creation Operation",
                     "Operation cree $libOperationSaisie montant : $montantOperationSaisie sur le compte ${compte.idCompte}"
                 )
-                var operation = Operation(libOperationSaisie, montantOperationSaisie.toDouble(), compte.idCompte)
+                val operation = Operation(libOperationSaisie, montantOperationSaisie.toDouble(), compte.idCompte)
                 saveOperation(operation)
                 mAjSolde(operation)
                 MaJListeOperations()
@@ -136,6 +127,8 @@ class CompteDetailActivity() : AppCompatActivity() {
         }
         builder.show()
     }
+
+
 
 
     //Sauvegarde en base de l'opération
@@ -152,20 +145,20 @@ class CompteDetailActivity() : AppCompatActivity() {
         compte.solde += operation.montantOperation
         if (database.AffecterOperation(compte)) {
             if (operation.montantOperation > 0) {
-                Toast.makeText(this, "Recette ajoutée avec succès", Toast.LENGTH_SHORT)
+                Toast.makeText(this, "Recette ajoutée avec succès", Toast.LENGTH_SHORT).show()
             } else {
-                Toast.makeText(this, "Dépense ajoutée avec succès", Toast.LENGTH_SHORT)
+                Toast.makeText(this, "Dépense ajoutée avec succès", Toast.LENGTH_SHORT).show()
             }
 
         } else {
             if (operation.montantOperation > 0) {
-                Toast.makeText(this, "Erreur survenue lors de l'ajout de la recette", Toast.LENGTH_SHORT)
+                Toast.makeText(this, "Erreur survenue lors de l'ajout de la recette", Toast.LENGTH_SHORT).show()
             } else {
-                Toast.makeText(this, "Erreur survenue lors de l'ajout de la dépense", Toast.LENGTH_SHORT)
+                Toast.makeText(this, "Erreur survenue lors de l'ajout de la dépense", Toast.LENGTH_SHORT).show()
             }
         }
 
-        findViewById<TextView>(R.id.soldeCompteDetail).text = compte.solde.toString() + " €"
+        findViewById<TextView>(R.id.soldeCompteDetail).setText("${compte.solde} €")
         intent = Intent()
         setResult(RESULT_OK, intent)
 

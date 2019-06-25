@@ -34,11 +34,11 @@ class OperationAdapter(val operations: List<Operation>, val itemClickListener: V
         //Mise en forme d'une opération (vert si montant positif et rouge si montant négatif)
         if (holder.montantOperation.text.toString().toDouble() > 0) {
             holder.montantOperation.setTextColor(Color.GREEN)
-            holder.montantOperation.text = operation.montantOperation.toString() + " €"
+            holder.montantOperation.setText("${operation.montantOperation} €")
         }
         else {
             holder.montantOperation.setTextColor(Color.RED)
-            holder.montantOperation.text = operation.montantOperation.toString() + " €"
+            holder.montantOperation.setText("${operation.montantOperation} €")
         }
     }
 
