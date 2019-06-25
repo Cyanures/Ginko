@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                                             android:layout_width="match_parent"
-                                             android:layout_height="30dp">
+<RelativeLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="30dp">
 
     <android.support.v7.widget.CardView
             android:id="@+id/cardViewOperation"
@@ -14,13 +16,29 @@
                 android:layout_height="match_parent"
                 >
             <TextView
+                    android:id="@+id/dateOperation"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="10sp"
+                    android:textStyle="bold"
+                    android:layout_marginLeft="10dp"
+                    android:layout_centerVertical="true"
+            />
+
+            <TextView
                     android:id="@+id/nomOperation"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textSize="20sp"
+                    android:layout_toRightOf="@id/dateOperation"
+                    android:layout_toLeftOf="@+id/montantOperation"
+                    android:textSize="15sp"
                     android:textStyle="bold"
-                    android:layout_marginLeft="10dp"
+                    android:layout_centerVertical="true"
+                    android:layout_marginLeft="30dp"
+
+
             />
+
             <TextView
                     android:id="@+id/montantOperation"
                     android:layout_width="wrap_content"

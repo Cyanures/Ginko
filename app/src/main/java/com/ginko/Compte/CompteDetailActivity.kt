@@ -1,15 +1,20 @@
 package com.ginko.Compte
 
+import android.app.DatePickerDialog
 import android.content.Intent
 import android.graphics.Color
+import android.icu.util.Calendar
+import android.os.Build
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Parcel
+import android.support.annotation.RequiresApi
 import android.support.design.widget.FloatingActionButton
 import android.support.v7.app.AlertDialog
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.util.Log
+import android.view.View
 import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
@@ -19,6 +24,15 @@ import com.ginko.Opérations.OperationAdapter
 import com.ginko.R
 import com.ginko.Database as Database
 import com.ginko.Compte.CompteActivity
+import android.icu.util.TimeZone
+import android.widget.DatePicker
+import com.ginko.Opérations.TextViewDatePicker
+import kotlinx.android.synthetic.main.activity_operation_create.*
+import java.sql.Timestamp
+import java.text.SimpleDateFormat
+import java.time.format.DateTimeFormatter
+import java.util.*
+
 
 class CompteDetailActivity() : AppCompatActivity() {
 
@@ -35,10 +49,12 @@ class CompteDetailActivity() : AppCompatActivity() {
     private lateinit var compteDetail: TextView
     private lateinit var soldeDetail: TextView
 
+
     constructor(parcel: Parcel) : this() {
         compte = parcel.readParcelable(Compte::class.java.classLoader)
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_compte_detail)
@@ -87,15 +103,19 @@ class CompteDetailActivity() : AppCompatActivity() {
 
 
     //Affichage de la modale de saisie d'une opération
+    @RequiresApi(Build.VERSION_CODES.O)
     private fun OpenCreateOperation() {
         val context = this
         val builder = AlertDialog.Builder(context)
-        builder.setTitle("Ajouter un compte")
+        builder.setTitle("Ajouter une Opération")
 
         val view = layoutInflater.inflate(R.layout.activity_operation_create,null)
 
         val saisieLibOperation = view.findViewById<EditText>(R.id.saisieLibOperation)
         val saisieMontantOperation = view.findViewById<EditText>(R.id.saisieMontantOperation)
+        val saisieDate = view.findViewById<EditText>(R.id.saisieDate)
+        val dateSaisie = TextViewDatePicker(context,saisieDate)
+
 
 
         builder.setView(view)
@@ -104,6 +124,12 @@ class CompteDetailActivity() : AppCompatActivity() {
         builder.setPositiveButton(android.R.string.ok) { _, _ ->
             val libOperationSaisie = saisieLibOperation.text.toString()
             val montantOperationSaisie = saisieMontantOperation.text.toString()
+            val dateOperationSaisie = saisieDate.text.toString()
+            val date = SimpleDateFormat("dd-MM-yyyy").parse(dateOperationSaisie)
+
+
+
+
 
             if (libOperationSaisie == "" || montantOperationSaisie == "") {
                 Toast.makeText(this, "Impossible de créer une opération sans montant ou libelle", Toast.LENGTH_LONG)
@@ -111,9 +137,9 @@ class CompteDetailActivity() : AppCompatActivity() {
             } else {
                 Log.i(
                     "Creation Operation",
-                    "Operation cree $libOperationSaisie montant : $montantOperationSaisie sur le compte ${compte.idCompte}"
+                    "Operation cree $libOperationSaisie montant : $montantOperationSaisie sur le compte ${compte.idCompte} date opération : $dateOperationSaisie"
                 )
-                val operation = Operation(libOperationSaisie, montantOperationSaisie.toDouble(), compte.idCompte)
+                val operation = Operation(libOperationSaisie, montantOperationSaisie.toDouble(),date.time, compte.idCompte)
                 saveOperation(operation)
                 mAjSolde(operation)
                 MaJListeOperations()
@@ -141,7 +167,7 @@ class CompteDetailActivity() : AppCompatActivity() {
         }
     }
 
-    //Récupération et mise à jour du solde
+    //Récupération et mise à jour du solde + affichage d'un toast sur l'opération ajoutée
     fun mAjSolde(operation: Operation) {
         compte.solde += operation.montantOperation
         if (database.AffecterOperation(compte)) {
@@ -159,7 +185,7 @@ class CompteDetailActivity() : AppCompatActivity() {
             }
         }
 
-        findViewById<TextView>(R.id.soldeCompteDetail).setText("${compte.solde} €")
+        findViewById<TextView>(com.ginko.R.id.soldeCompteDetail).setText("${compte.solde} €")
         intent = Intent()
         setResult(RESULT_OK, intent)
 

@@ -46,9 +46,9 @@ private const val OPERATION_KEY_IdCompte = "idCompteOperation"
 private const val OPERATION_TABLE_CREATE = """
     CREATE TABLE $OPERATION_TABLE_NAME (
     $OPERATION_KEY_ID INTEGER PRIMARY KEY,
-    $OPERATION_KEY_Date DATE,
     $OPERATION_KEY_Libelle TEXT,
     $OPERATION_KEY_Montant LONG,
+    $OPERATION_KEY_Date NUMERIC,
     $OPERATION_KEY_IdCompte INTEGER,
     FOREIGN KEY ($OPERATION_KEY_IdCompte) REFERENCES $COMPTE_TABLE_NAME($COMPTE_KEY_ID)
     );
@@ -99,6 +99,7 @@ class Database(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null
         val values = ContentValues()
         values.put(OPERATION_KEY_Libelle, operation.libelleOperation)
         values.put(OPERATION_KEY_Montant, operation.montantOperation)
+        values.put(OPERATION_KEY_Date, operation.dateOperation)
         values.put(OPERATION_KEY_IdCompte, operation.idCompte)
 
 
@@ -150,13 +151,14 @@ class Database(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null
 
     fun getOperations(idCompte: Int): MutableList<Operation> {
         var operations = mutableListOf<Operation>()
-        readableDatabase.rawQuery(OPERATION_QUERY_SELECT_ALL + " WHERE ${OPERATION_KEY_IdCompte} = $idCompte", null)
+        readableDatabase.rawQuery(OPERATION_QUERY_SELECT_ALL + " WHERE ${OPERATION_KEY_IdCompte} = $idCompte ORDER BY ${OPERATION_KEY_Date} DESC", null)
             .use { cursor ->
                 while (cursor.moveToNext()) {
                     val operation = Operation(
                         cursor.getInt(cursor.getColumnIndex(OPERATION_KEY_ID)),
                         cursor.getString(cursor.getColumnIndex(OPERATION_KEY_Libelle)),
                         cursor.getDouble(cursor.getColumnIndex(OPERATION_KEY_Montant)),
+                        cursor.getLong(cursor.getColumnIndex(OPERATION_KEY_Date)),
                         cursor.getInt(cursor.getColumnIndex(OPERATION_KEY_IdCompte))
                     )
                     operations.add(operation)

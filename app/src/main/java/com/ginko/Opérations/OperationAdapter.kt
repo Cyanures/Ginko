@@ -8,6 +8,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import com.ginko.R
+import java.sql.Date
+import java.text.SimpleDateFormat
 
 class OperationAdapter(val operations: List<Operation>, val itemClickListener: View.OnClickListener?) :
     RecyclerView.Adapter<OperationAdapter.ViewHolder>() {
@@ -15,6 +17,7 @@ class OperationAdapter(val operations: List<Operation>, val itemClickListener: V
         val cardViewOperation = itemView.findViewById<CardView>(R.id.cardViewOperation)
         val nomOperation = cardViewOperation.findViewById<TextView>(R.id.nomOperation)
         val montantOperation = cardViewOperation.findViewById<TextView>(R.id.montantOperation)
+        val dateOperation = cardViewOperation.findViewById<TextView>(R.id.dateOperation)
     }
 
 
@@ -31,6 +34,7 @@ class OperationAdapter(val operations: List<Operation>, val itemClickListener: V
         holder.cardViewOperation.tag = position
         holder.nomOperation.text = operation.libelleOperation
         holder.montantOperation.text = operation.montantOperation.toString()
+        holder.dateOperation.text = SimpleDateFormat("dd-MM-yyyy").format(Date(operation.dateOperation)).toString()
         //Mise en forme d'une opération (vert si montant positif et rouge si montant négatif)
         if (holder.montantOperation.text.toString().toDouble() > 0) {
             holder.montantOperation.setTextColor(Color.parseColor("#2bbf38"))

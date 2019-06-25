@@ -22,4 +22,12 @@
             android:layout_below="@+id/saisieLibOperation"
     />
 
+    <EditText
+            android:id="@+id/saisieDate"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/saisieMontantOperation"
+            android:hint="Choisissez une date"
+            android:focusable="false"/>
+
 </RelativeLayout>
