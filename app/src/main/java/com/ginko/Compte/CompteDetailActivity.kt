@@ -75,12 +75,12 @@ class CompteDetailActivity() : AppCompatActivity() {
 
         //rafraichissement de la couleur du solde si celui-ci change après l'affectation d'une recette ou d'une dépense
        if(soldeDetail.text.toString().toDouble() > 0){
-           soldeDetail.setTextColor(Color.GREEN)
+           soldeDetail.setTextColor(Color.parseColor("#2bbf38"))
            soldeDetail.setText("${compte.solde} €")
 
         }
         else{
-            soldeDetail.setTextColor(Color.RED)
+            soldeDetail.setTextColor(Color.parseColor("#d62f2f"))
             soldeDetail.setText("${compte.solde} €")
         }
     }
@@ -100,7 +100,7 @@ class CompteDetailActivity() : AppCompatActivity() {
 
         builder.setView(view)
 
-        // set up the ok button
+        //Bouton Ajouter
         builder.setPositiveButton(android.R.string.ok) { _, _ ->
             val libOperationSaisie = saisieLibOperation.text.toString()
             val montantOperationSaisie = saisieMontantOperation.text.toString()
@@ -122,6 +122,7 @@ class CompteDetailActivity() : AppCompatActivity() {
 
 
         }
+        //Bouton Annuler
         builder.setNegativeButton(android.R.string.cancel) { dialog, _ ->
             dialog.cancel()
         }

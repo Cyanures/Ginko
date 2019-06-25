@@ -22,4 +22,13 @@
             android:layout_below="@+id/saisieNomCompte"
     />
 
+    <android.support.v7.widget.AppCompatCheckBox
+            android:id="@+id/saisieIncludedInBalance"
+            android:layout_width="267dp"
+            android:layout_height="46dp"
+            android:layout_below="@id/saisieSoldeCompte"
+            android:text="Inclure le compte dans la balance"
+
+    />
+
 </RelativeLayout>

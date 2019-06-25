@@ -19,13 +19,15 @@ private const val COMPTE_TABLE_NAME = "Compte"
 private const val COMPTE_KEY_ID = "idCompte"
 private const val COMPTE_KEY_Name = "nomCompte"
 private const val COMPTE_KEY_Solde = "solde"
+private const val COMPTE_KEY_IncludedInBalance = "includedInBalance"
 
 // CREATION DE LA TABLE COMPTE
 private const val COMPTE_TABLE_CREATE = """
     CREATE TABLE $COMPTE_TABLE_NAME (
     $COMPTE_KEY_ID INTEGER PRIMARY KEY,
     $COMPTE_KEY_Name TEXT,
-    $COMPTE_KEY_Solde LONG
+    $COMPTE_KEY_Solde DOUBLE,
+    $COMPTE_KEY_IncludedInBalance INTEGER
     );
     """
 //////////////////FIN COMPTE//////////////////////
@@ -58,6 +60,9 @@ private const val OPERATION_TABLE_CREATE = """
 //RECUPERATION DE TOUS LES COMPTES
 private const val COMPTE_QUERY_SELECT_ALL = "SELECT * FROM $COMPTE_TABLE_NAME"
 
+//RECUPERATION DES COMPTES INCLUS DANS LA BALANCE
+private const val COMPTE_QUERY_SELECT_ONLYINCLUDEDINBALANCE = "SELECT * FROM $COMPTE_TABLE_NAME WHERE $COMPTE_KEY_IncludedInBalance = 1"
+
 //RECUPERATION DE TOUTES LES OPERATIONS
 private const val OPERATION_QUERY_SELECT_ALL = "SELECT * FROM $OPERATION_TABLE_NAME"
 
@@ -79,6 +84,7 @@ class Database(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null
         val values = ContentValues()
         values.put(COMPTE_KEY_Name, compte.nomCompte)
         values.put(COMPTE_KEY_Solde, compte.solde)
+        values.put(COMPTE_KEY_IncludedInBalance,compte.includedInBalance)
 
         val id = writableDatabase.insert(COMPTE_TABLE_NAME, null, values)
         compte.idCompte = id.toInt()
@@ -112,7 +118,8 @@ class Database(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null
                 val compte = Compte(
                     cursor.getInt(cursor.getColumnIndex(COMPTE_KEY_ID)),
                     cursor.getString(cursor.getColumnIndex(COMPTE_KEY_Name)),
-                    cursor.getDouble(cursor.getColumnIndex(COMPTE_KEY_Solde))
+                    cursor.getDouble(cursor.getColumnIndex(COMPTE_KEY_Solde)),
+                    cursor.getInt(cursor.getColumnIndex(COMPTE_KEY_IncludedInBalance))
                 )
 
                 comptes.add(compte)
@@ -122,6 +129,23 @@ class Database(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null
 
         return comptes
 
+    }
+
+    fun getComptesIncludedInBalance(): MutableList<Compte> {
+        var comptes = mutableListOf<Compte>()
+
+        readableDatabase.rawQuery(COMPTE_QUERY_SELECT_ONLYINCLUDEDINBALANCE, null).use { cursor ->
+            while (cursor.moveToNext()) {
+                val compte = Compte(
+                    cursor.getInt(cursor.getColumnIndex(COMPTE_KEY_ID)),
+                    cursor.getString(cursor.getColumnIndex(COMPTE_KEY_Name)),
+                    cursor.getDouble(cursor.getColumnIndex(COMPTE_KEY_Solde)),
+                    cursor.getInt(cursor.getColumnIndex(COMPTE_KEY_IncludedInBalance))
+                )
+                comptes.add(compte)
+            }
+        }
+        return comptes
     }
 
     fun getOperations(idCompte: Int): MutableList<Operation> {

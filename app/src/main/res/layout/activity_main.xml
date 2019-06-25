@@ -7,10 +7,39 @@
         android:layout_height="match_parent"
         tools:context=".Compte.CompteActivity">
 
+    <RelativeLayout
+            android:id="@+id/layoutBalance"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="10dp"
+    >
+        <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Balance :"
+                android:textSize="30sp"
+                android:textStyle="italic"
+                android:layout_centerVertical="true"
+        />
+        <TextView
+                android:id="@+id/Balance"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:textStyle="italic"
+                android:textSize="30sp"
+                android:layout_centerVertical="true"
+        />
+
+
+    </RelativeLayout>
+
+
     <android.support.v7.widget.RecyclerView
         android:id="@+id/compteRecyclerView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_below="@+id/layoutBalance"
         tools:listitem="@layout/item_compte">
 
     </android.support.v7.widget.RecyclerView>
