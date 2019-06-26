@@ -34,12 +34,15 @@ import java.util.*
 
 class CompteDetailActivity() : AppCompatActivity(), OnClickListener, View.OnLongClickListener {
     override fun onLongClick(v: View?): Boolean {
+        //Sur un clic long, proposer de supprimer l'operation (modale --> "êtes-vous sûr de vouloir supprimer l'opération ??"
         Toast.makeText(this,"Long Click on item",Toast.LENGTH_SHORT).show()
         Log.i("LongClick","Long Click on item")
         return true
     }
 
     override fun onClick(v: View?) {
+        //sur un clic simple proposer une page de modification de la recette/depense
+        //recupérer la depense en cours et s'il y a changement supprimer l'ancienne pour ajouter la nouvelle
         Toast.makeText(this,"Click on item",Toast.LENGTH_SHORT).show()
         Log.i("Click","Simple Click on item")
     }
