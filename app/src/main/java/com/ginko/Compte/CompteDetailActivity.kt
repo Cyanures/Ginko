@@ -22,6 +22,7 @@ import com.ginko.R
 import com.ginko.Database as Database
 import com.ginko.Compte.CompteActivity
 import android.icu.util.TimeZone
+import android.view.View.OnClickListener
 import android.widget.*
 import com.ginko.Opérations.TextViewDatePicker
 import kotlinx.android.synthetic.main.activity_operation_create.*
@@ -31,7 +32,17 @@ import java.time.format.DateTimeFormatter
 import java.util.*
 
 
-class CompteDetailActivity() : AppCompatActivity() {
+class CompteDetailActivity() : AppCompatActivity(), OnClickListener, View.OnLongClickListener {
+    override fun onLongClick(v: View?): Boolean {
+        Toast.makeText(this,"Long Click on item",Toast.LENGTH_SHORT).show()
+        Log.i("LongClick","Long Click on item")
+        return true
+    }
+
+    override fun onClick(v: View?) {
+        Toast.makeText(this,"Click on item",Toast.LENGTH_SHORT).show()
+        Log.i("Click","Simple Click on item")
+    }
 
 
     companion object {
@@ -75,7 +86,7 @@ class CompteDetailActivity() : AppCompatActivity() {
 
     private fun MaJListeOperations() {
         operations = database.getOperations(compte.idCompte)
-        adapter = OperationAdapter(operations, null)
+        adapter = OperationAdapter(operations, this,this)
         val recyclerView = findViewById<RecyclerView>(R.id.OperationRecyclerView)
         recyclerView.layoutManager = LinearLayoutManager(this)
         recyclerView.adapter = adapter
