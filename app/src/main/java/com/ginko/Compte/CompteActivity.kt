@@ -18,7 +18,12 @@ import com.ginko.App
 import com.ginko.Database
 import kotlinx.android.synthetic.main.activity_main.*
 
-class CompteActivity : AppCompatActivity(), View.OnClickListener {
+class CompteActivity : AppCompatActivity(), View.OnClickListener, View.OnLongClickListener {
+    override fun onLongClick(v: View?): Boolean {
+        //Popup de demande de suppression du compte sur un clic long (on supprime aussi toutes les OP avec cet idCompte
+        Toast.makeText(this,"Long click sur un compte", Toast.LENGTH_SHORT).show()
+        return true
+    }
 
     //lateinit var comptes: MutableList<Compte>
     lateinit var adapter: CompteAdapter
@@ -104,7 +109,7 @@ class CompteActivity : AppCompatActivity(), View.OnClickListener {
 
     private fun MaJCompteAccueil() {
         comptes = database.getComptes()
-        adapter = CompteAdapter(comptes, this)
+        adapter = CompteAdapter(comptes, this, this)
         val recyclerView = findViewById<RecyclerView>(R.id.compteRecyclerView)
         recyclerView.layoutManager = LinearLayoutManager(this)
         recyclerView.adapter = adapter

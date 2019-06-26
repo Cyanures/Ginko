@@ -10,7 +10,7 @@ import android.widget.TextView
 import com.ginko.R
 import kotlinx.android.synthetic.main.activity_main.view.*
 
-class CompteAdapter(val comptes: List<Compte>, val itemClickListener: View.OnClickListener) :
+class CompteAdapter(val comptes: List<Compte>, val itemClickListener: View.OnClickListener, val itemLongClickListener: View.OnLongClickListener) :
     RecyclerView.Adapter<CompteAdapter.ViewHolder>() {
     class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val cardView = itemView.findViewById<CardView>(R.id.cardView)
@@ -30,6 +30,7 @@ class CompteAdapter(val comptes: List<Compte>, val itemClickListener: View.OnCli
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val compte = comptes[position]
         holder.cardView.setOnClickListener(itemClickListener)
+        holder.cardView.setOnLongClickListener(itemLongClickListener)
         holder.cardView.tag = position
         holder.nomCompte.text = compte.nomCompte
         holder.soldeCompte.setText("${compte.solde} €")

@@ -9,6 +9,7 @@
             android:layout_height="wrap_content"
             android:focusable="true"
             android:clickable="true"
+            android:longClickable="true"
             android:foreground="?android:attr/selectableItemBackground"
             >
 
