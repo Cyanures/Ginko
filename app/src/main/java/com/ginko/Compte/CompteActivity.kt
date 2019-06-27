@@ -124,7 +124,7 @@ class CompteActivity : AppCompatActivity(), View.OnClickListener, View.OnLongCli
         for(compte:Compte in comptesBalance){
             balance += compte.solde
         }
-        Balance.text = "$balance €"
+        Balance.setText(String.format("%.2f", balance) +" €")
     }
 
     fun AfficherDetailCompte(compteIndex: Int) {

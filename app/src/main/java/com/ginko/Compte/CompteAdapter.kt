@@ -33,7 +33,7 @@ class CompteAdapter(val comptes: List<Compte>, val itemClickListener: View.OnCli
         holder.cardView.setOnLongClickListener(itemLongClickListener)
         holder.cardView.tag = position
         holder.nomCompte.text = compte.nomCompte
-        holder.soldeCompte.setText("${compte.solde} €")
+        holder.soldeCompte.setText(String.format("%.2f", compte.solde) +" €")
 
     }
 

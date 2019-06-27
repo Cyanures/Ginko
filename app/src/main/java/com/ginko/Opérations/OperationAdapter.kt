@@ -42,7 +42,7 @@ class OperationAdapter(val operations: List<Operation>, val itemLongClickListene
         //Mise en forme d'une opération (vert si montant positif et rouge si montant négatif)
         if (holder.montantOperation.text.toString().toDouble() > 0) {
             holder.montantOperation.setTextColor(Color.parseColor("#2bbf38"))
-            holder.montantOperation.setText("${operation.montantOperation} €")
+            holder.montantOperation.setText(String.format("%.2f", operation.montantOperation) +" €")
         }
         else {
             holder.montantOperation.setTextColor(Color.parseColor("#d62f2f"))

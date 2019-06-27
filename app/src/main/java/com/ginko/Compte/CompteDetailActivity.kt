@@ -1,5 +1,6 @@
 package com.ginko.Compte
 
+import android.annotation.SuppressLint
 import android.app.DatePickerDialog
 import android.content.Intent
 import android.graphics.Color
@@ -33,6 +34,7 @@ import java.time.format.DateTimeFormatter
 import java.util.*
 
 
+@Suppress("UNREACHABLE_CODE")
 class CompteDetailActivity() : AppCompatActivity(), OnClickListener, View.OnLongClickListener {
     override fun onLongClick(v: View?): Boolean {
         //Sur un clic long, proposer de supprimer l'operation (modale --> "êtes-vous sûr de vouloir supprimer l'opération ??"
@@ -99,12 +101,12 @@ class CompteDetailActivity() : AppCompatActivity(), OnClickListener, View.OnLong
         //rafraichissement de la couleur du solde si celui-ci change après l'affectation d'une recette ou d'une dépense
        if(soldeDetail.text.toString().toDouble() > 0){
            soldeDetail.setTextColor(Color.parseColor("#2bbf38"))
-           soldeDetail.setText("${compte.solde} €")
+           soldeDetail.setText(String.format("%.2f", compte.solde) +" €")
 
         }
         else{
             soldeDetail.setTextColor(Color.parseColor("#d62f2f"))
-            soldeDetail.setText("${compte.solde} €")
+            soldeDetail.setText(String.format("%.2f", compte.solde) +" €")
         }
     }
 
@@ -126,7 +128,7 @@ class CompteDetailActivity() : AppCompatActivity(), OnClickListener, View.OnLong
             }
         }
 
-        findViewById<TextView>(com.ginko.R.id.soldeCompteDetail).setText("${compte.solde} €")
+        findViewById<TextView>(com.ginko.R.id.soldeCompteDetail).setText(String.format("%.2f", compte.solde) +" €")
         intent = Intent()
         setResult(RESULT_OK, intent)
     }
@@ -195,6 +197,7 @@ class CompteDetailActivity() : AppCompatActivity(), OnClickListener, View.OnLong
     }
 
     //Affichage de la modale de modification d'une opération
+    @SuppressLint("SimpleDateFormat")
     @RequiresApi(Build.VERSION_CODES.O)
     private fun OpenModifOperation(position:Int) {
         TODO("FAIRE UN SORTE QUE LE SOLDE SOIT MODIFIER DE LA BONNE MANIERE (suppression de l'ancienne OP et ajout de la nouvelle)")
