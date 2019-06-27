@@ -101,6 +101,7 @@ class Database(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null
         Log.i("Creation", "Creation du compte ${values} avec l'id ${id}")
         return id > 0
 
+
     }
 
     //Creation d'une opération en BDD
@@ -186,6 +187,18 @@ class Database(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null
             COMPTE_KEY_ID + "=?",
             arrayOf(compte.idCompte.toString())
         )
+        return id > 0
+    }
+
+    fun ModifierOperation(operation: Operation): Boolean {
+        val values = ContentValues()
+        values.put(OPERATION_KEY_Libelle, operation.libelleOperation)
+        values.put(OPERATION_KEY_Montant, operation.montantOperation)
+        values.put(OPERATION_KEY_Date, operation.dateOperation)
+        val id = writableDatabase.update(
+            OPERATION_TABLE_NAME,
+            values,
+            OPERATION_KEY_ID + "=?", arrayOf(operation.idOperation.toString()))
         return id > 0
     }
 

@@ -26,6 +26,7 @@ import android.view.View.OnClickListener
 import android.widget.*
 import com.ginko.Opérations.TextViewDatePicker
 import kotlinx.android.synthetic.main.activity_operation_create.*
+import java.sql.Date
 import java.sql.Timestamp
 import java.text.SimpleDateFormat
 import java.time.format.DateTimeFormatter
@@ -40,11 +41,11 @@ class CompteDetailActivity() : AppCompatActivity(), OnClickListener, View.OnLong
         return true
     }
 
-    override fun onClick(v: View?) {
-        //sur un clic simple proposer une page de modification de la recette/depense
-        //recupérer la depense en cours et s'il y a changement supprimer l'ancienne pour ajouter la nouvelle
-        Toast.makeText(this,"Click on item",Toast.LENGTH_SHORT).show()
-        Log.i("Click","Simple Click on item")
+    @RequiresApi(Build.VERSION_CODES.O)
+    override fun onClick(view: View) {
+        if (view.tag != null) {
+            OpenModifOperation(view.tag as Int)
+        }
     }
 
 
@@ -80,11 +81,6 @@ class CompteDetailActivity() : AppCompatActivity(), OnClickListener, View.OnLong
         //Récupération du FAB et passage de l'action lors du clic
         val fab = findViewById<FloatingActionButton>(R.id.fabOperation)
         fab.setOnClickListener { OpenCreateOperation() }
-
-
-
-
-
     }
 
     private fun MaJListeOperations() {
@@ -112,6 +108,28 @@ class CompteDetailActivity() : AppCompatActivity(), OnClickListener, View.OnLong
         }
     }
 
+    //Récupération et mise à jour du solde + affichage d'un toast sur l'opération ajoutée
+    fun mAjSolde(operation: Operation) {
+        compte.solde += operation.montantOperation
+        if (database.AffecterOperation(compte)) {
+            if (operation.montantOperation > 0) {
+                Toast.makeText(this, "Recette ajoutée avec succès", Toast.LENGTH_SHORT).show()
+            } else {
+                Toast.makeText(this, "Dépense ajoutée avec succès", Toast.LENGTH_SHORT).show()
+            }
+
+        } else {
+            if (operation.montantOperation > 0) {
+                Toast.makeText(this, "Erreur survenue lors de l'ajout de la recette", Toast.LENGTH_SHORT).show()
+            } else {
+                Toast.makeText(this, "Erreur survenue lors de l'ajout de la dépense", Toast.LENGTH_SHORT).show()
+            }
+        }
+
+        findViewById<TextView>(com.ginko.R.id.soldeCompteDetail).setText("${compte.solde} €")
+        intent = Intent()
+        setResult(RESULT_OK, intent)
+    }
 
     //Affichage de la modale de saisie d'une opération
     @RequiresApi(Build.VERSION_CODES.O)
@@ -130,23 +148,15 @@ class CompteDetailActivity() : AppCompatActivity(), OnClickListener, View.OnLong
         val depense = view.findViewById<RadioButton>(R.id.checkboxDepense)
         val recette = view.findViewById<RadioButton>(R.id.checkboxRecette)
 
-
-
-
         builder.setView(view)
 
         //Bouton Ajouter
         builder.setPositiveButton(android.R.string.ok) { _, _ ->
+
             val libOperationSaisie = saisieLibOperation.text.toString()
             var montantOperationSaisie = saisieMontantOperation.text.toString()
             val dateOperationSaisie = saisieDate.text.toString()
             val date = SimpleDateFormat("dd-MM-yyyy").parse(dateOperationSaisie)
-
-
-
-
-
-
 
             if (libOperationSaisie == "" || montantOperationSaisie == "") {
                 Toast.makeText(this, "Impossible de créer une opération sans montant ou libelle", Toast.LENGTH_LONG)
@@ -175,9 +185,6 @@ class CompteDetailActivity() : AppCompatActivity(), OnClickListener, View.OnLong
         builder.show()
     }
 
-
-
-
     //Sauvegarde en base de l'opération
     private fun saveOperation(operation: Operation) {
         if (database.createOperation(operation)) {
@@ -187,29 +194,87 @@ class CompteDetailActivity() : AppCompatActivity(), OnClickListener, View.OnLong
         }
     }
 
-    //Récupération et mise à jour du solde + affichage d'un toast sur l'opération ajoutée
-    fun mAjSolde(operation: Operation) {
-        compte.solde += operation.montantOperation
-        if (database.AffecterOperation(compte)) {
-            if (operation.montantOperation > 0) {
-                Toast.makeText(this, "Recette ajoutée avec succès", Toast.LENGTH_SHORT).show()
-            } else {
-                Toast.makeText(this, "Dépense ajoutée avec succès", Toast.LENGTH_SHORT).show()
-            }
+    //Affichage de la modale de modification d'une opération
+    @RequiresApi(Build.VERSION_CODES.O)
+    private fun OpenModifOperation(position:Int) {
 
-        } else {
-            if (operation.montantOperation > 0) {
-                Toast.makeText(this, "Erreur survenue lors de l'ajout de la recette", Toast.LENGTH_SHORT).show()
-            } else {
-                Toast.makeText(this, "Erreur survenue lors de l'ajout de la dépense", Toast.LENGTH_SHORT).show()
-            }
+        val operation = operations[position]
+        val ancienneoperation = Operation(operation.libelleOperation,operation.montantOperation,operation.dateOperation,operation.idCompte)
+        val context = this
+        val builder = AlertDialog.Builder(context)
+        builder.setTitle("Modifier une Opération")
+
+        val view = layoutInflater.inflate(R.layout.activity_operation_create,null)
+        val checkboxDepense = view.findViewById<RadioButton>(R.id.checkboxDepense)
+        val checkboxRecette = view.findViewById<RadioButton>(R.id.checkboxRecette)
+        val saisieLibOperation = view.findViewById<EditText>(R.id.saisieLibOperation)
+        saisieLibOperation.setText(operation.libelleOperation)
+        if(operation.montantOperation < 0){
+            operation.montantOperation = -operation.montantOperation
+            checkboxDepense.isChecked = true
         }
+        else{
+            checkboxRecette.isChecked = true
+        }
+        val saisieMontantOperation = view.findViewById<EditText>(R.id.saisieMontantOperation)
+        saisieMontantOperation.setText(operation.montantOperation.toString())
 
-        findViewById<TextView>(com.ginko.R.id.soldeCompteDetail).setText("${compte.solde} €")
-        intent = Intent()
-        setResult(RESULT_OK, intent)
+        val saisieDate = view.findViewById<EditText>(R.id.saisieDate)
+        saisieDate.setText(SimpleDateFormat("dd-MM-yyyy").format(Date(operation.dateOperation)).toString())
+        TextViewDatePicker(context,saisieDate)
 
+        builder.setView(view)
+
+        //Bouton Modifier
+        builder.setPositiveButton("Modifier") { _, _ ->
+            //Permet de supprimer l'ancien montant afin d'affecter seulement le nouveau montant
+
+
+            val idOperation = operation.idOperation
+            val libOperationSaisie = saisieLibOperation.text.toString()
+            var montantOperationSaisie = saisieMontantOperation.text.toString()
+            val dateOperationSaisie = saisieDate.text.toString()
+            val date = SimpleDateFormat("dd-MM-yyyy").parse(dateOperationSaisie)
+
+            //Ajouter le controle sur les dates
+            if (libOperationSaisie == "" || montantOperationSaisie == "")  {
+                Toast.makeText(this, "Impossible de créer une opération sans montant ou libelle", Toast.LENGTH_LONG)
+                    .show()
+            } else {
+                Log.i(
+                    "Creation Operation",
+                    "Operation cree $libOperationSaisie montant : $montantOperationSaisie sur le compte ${compte.idCompte} date opération : $dateOperationSaisie"
+                )
+                if(checkboxDepense.isChecked){
+                    montantOperationSaisie = (-saisieMontantOperation.text.toString().toDouble()).toString()
+                }
+                val operation = Operation(idOperation,libOperationSaisie,montantOperationSaisie.toDouble(),date.time, compte.idCompte)
+                ModifOperation(operation, position)
+                mAjSolde(operation)
+                MaJListeOperations()
+
+            }
+
+
+        }
+        //Bouton Annuler
+        builder.setNegativeButton(android.R.string.cancel) { dialog, _ ->
+            dialog.cancel()
+        }
+        builder.show()
     }
+
+    private fun ModifOperation(operation: Operation, position: Int) {
+        operations[position] = operation
+        if (database.ModifierOperation(operation)) {
+            Toast.makeText(this, "Opération modifiée avec succès", Toast.LENGTH_SHORT).show()
+        } else {
+            Toast.makeText(this, "Erreur survenue lors de la modification de l'opération", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+
+
 
 }
 

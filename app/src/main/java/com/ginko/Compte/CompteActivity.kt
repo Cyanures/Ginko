@@ -19,13 +19,8 @@ import com.ginko.Database
 import kotlinx.android.synthetic.main.activity_main.*
 
 class CompteActivity : AppCompatActivity(), View.OnClickListener, View.OnLongClickListener {
-    override fun onLongClick(v: View?): Boolean {
-        //Popup de demande de suppression du compte sur un clic long (on supprime aussi toutes les OP avec cet idCompte
-        Toast.makeText(this,"Long click sur un compte", Toast.LENGTH_SHORT).show()
-        return true
-    }
 
-    //lateinit var comptes: MutableList<Compte>
+
     lateinit var adapter: CompteAdapter
     private lateinit var database: Database
     private lateinit var comptes: MutableList<Compte>
@@ -48,14 +43,21 @@ class CompteActivity : AppCompatActivity(), View.OnClickListener, View.OnLongCli
     }
 
 
-
+    //Clic sur un compte, lance l'activity_compte_detail
     override fun onClick(view: View) {
         if (view.tag != null) {
             AfficherDetailCompte(view.tag as Int)
         }
-
-
     }
+
+    //Sur un clic Long, demande si on souhaite supprimer un compte
+    override fun onLongClick(v: View?): Boolean {
+        //Popup de demande de suppression du compte sur un clic long (on supprime aussi toutes les OP avec cet idCompte
+        Toast.makeText(this,"Long click sur un compte", Toast.LENGTH_SHORT).show()
+        return true
+    }
+
+
     //Quand on reçoit un resultat de CompteDetailActivity (quand une operation est ajoutée)
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         if (resultCode != Activity.RESULT_OK || data == null) {
@@ -130,12 +132,7 @@ class CompteActivity : AppCompatActivity(), View.OnClickListener, View.OnLongCli
 
         val intent = Intent(this, CompteDetailActivity::class.java)
         intent.putExtra(CompteDetailActivity.EXTRA_COMPTE, compte)
-        //intent.putExtra(CompteDetailActivity.EXTRA_COMPTE_INDEX, compteIndex)
-
-        startActivityForResult(
-            intent,
-            CompteDetailActivity.REQUEST_MaJ_SOLDE
-        ) //A la place, mettre un startActivityForResult afin d'être notifié du changement sur le solde
+        startActivityForResult(intent,CompteDetailActivity.REQUEST_MaJ_SOLDE)
     }
 
 
