@@ -197,7 +197,7 @@ class CompteDetailActivity() : AppCompatActivity(), OnClickListener, View.OnLong
     //Affichage de la modale de modification d'une opération
     @RequiresApi(Build.VERSION_CODES.O)
     private fun OpenModifOperation(position:Int) {
-
+        TODO("FAIRE UN SORTE QUE LE SOLDE SOIT MODIFIER DE LA BONNE MANIERE (suppression de l'ancienne OP et ajout de la nouvelle)")
         val operation = operations[position]
         val ancienneoperation = Operation(operation.libelleOperation,operation.montantOperation,operation.dateOperation,operation.idCompte)
         val context = this
