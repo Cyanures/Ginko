@@ -187,6 +187,7 @@ class CompteDetailActivity() : AppCompatActivity(), OnClickListener, View.OnLong
         builder.show()
     }
 
+
     //Sauvegarde en base de l'opération
     private fun saveOperation(operation: Operation) {
         if (database.createOperation(operation)) {
@@ -200,7 +201,7 @@ class CompteDetailActivity() : AppCompatActivity(), OnClickListener, View.OnLong
     @SuppressLint("SimpleDateFormat")
     @RequiresApi(Build.VERSION_CODES.O)
     private fun OpenModifOperation(position:Int) {
-        TODO("FAIRE UN SORTE QUE LE SOLDE SOIT MODIFIER DE LA BONNE MANIERE (suppression de l'ancienne OP et ajout de la nouvelle)")
+
         val operation = operations[position]
         val ancienneoperation = Operation(operation.libelleOperation,operation.montantOperation,operation.dateOperation,operation.idCompte)
         val context = this
@@ -231,7 +232,7 @@ class CompteDetailActivity() : AppCompatActivity(), OnClickListener, View.OnLong
         //Bouton Modifier
         builder.setPositiveButton("Modifier") { _, _ ->
             //Permet de supprimer l'ancien montant afin d'affecter seulement le nouveau montant
-
+            compte.solde +=(ancienneoperation.montantOperation*-1)
 
             val idOperation = operation.idOperation
             val libOperationSaisie = saisieLibOperation.text.toString()

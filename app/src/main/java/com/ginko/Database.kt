@@ -202,6 +202,10 @@ class Database(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null
         return id > 0
     }
 
+    fun SupprimerOperation(operation: Operation, compte: Compte): Boolean{
+        return true
+    }
+
 
 }
 
