@@ -36,20 +36,6 @@ import java.util.*
 
 @Suppress("UNREACHABLE_CODE")
 class CompteDetailActivity() : AppCompatActivity(), OnClickListener, View.OnLongClickListener {
-    override fun onLongClick(v: View?): Boolean {
-        //Sur un clic long, proposer de supprimer l'operation (modale --> "êtes-vous sûr de vouloir supprimer l'opération ??"
-        Toast.makeText(this,"Long Click on item",Toast.LENGTH_SHORT).show()
-        Log.i("LongClick","Long Click on item")
-        return true
-    }
-
-    @RequiresApi(Build.VERSION_CODES.O)
-    override fun onClick(view: View) {
-        if (view.tag != null) {
-            OpenModifOperation(view.tag as Int)
-        }
-    }
-
 
     companion object {
         val REQUEST_MaJ_SOLDE = 1
@@ -63,9 +49,18 @@ class CompteDetailActivity() : AppCompatActivity(), OnClickListener, View.OnLong
     private lateinit var compteDetail: TextView
     private lateinit var soldeDetail: TextView
 
+    override fun onLongClick(v: View?): Boolean {
+        //Sur un clic long, proposer de supprimer l'operation (modale --> "êtes-vous sûr de vouloir supprimer l'opération ??"
+        Toast.makeText(this,"Long Click on item",Toast.LENGTH_SHORT).show()
+        Log.i("LongClick","Long Click on item")
+        return true
+    }
 
-    constructor(parcel: Parcel) : this() {
-        compte = parcel.readParcelable(Compte::class.java.classLoader)
+    @RequiresApi(Build.VERSION_CODES.O)
+    override fun onClick(view: View) {
+        if (view.tag != null) {
+            OpenModifOperation(view.tag as Int)
+        }
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
