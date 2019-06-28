@@ -203,7 +203,11 @@ class Database(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null
     }
 
     fun SupprimerOperation(operation: Operation, compte: Compte): Boolean{
-        return true
+
+        val nombreDelete = writableDatabase.delete(OPERATION_TABLE_NAME,
+            "$OPERATION_KEY_ID = ?"
+            ,arrayOf(operation.idOperation.toString()))
+        return nombreDelete == 1
     }
 
 
