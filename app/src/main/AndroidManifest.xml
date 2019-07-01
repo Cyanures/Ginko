@@ -10,7 +10,10 @@
             android:roundIcon="@mipmap/ginko_logo"
             android:supportsRtl="true"
             android:theme="@style/AppTheme">
-        <activity android:name=".Compte.CompteDetailActivity">
+        <activity
+                android:name=".Compte.CompteDetailActivity"
+                android:parentActivityName=".Compte.CompteActivity"
+                android:windowSoftInputMode="adjustResize">
         </activity>
         <activity android:name=".Compte.CompteActivity">
             <intent-filter>

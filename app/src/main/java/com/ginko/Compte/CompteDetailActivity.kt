@@ -25,6 +25,7 @@ import com.ginko.Database as Database
 import com.ginko.Compte.CompteActivity
 import android.icu.util.TimeZone
 import android.support.v7.view.ActionMode
+import android.support.v7.widget.Toolbar
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View.OnClickListener
@@ -74,6 +75,11 @@ class CompteDetailActivity() : AppCompatActivity(), OnClickListener, View.OnLong
         setContentView(R.layout.activity_compte_detail)
         database = App.database
 
+        //Récupération de la toolbar
+        val toolbar = findViewById<Toolbar>(R.id.ToolbarDetailCompte)
+        setSupportActionBar(toolbar)
+        toolbar.setTitle("Détail d'un compte")
+        supportActionBar!!.setDisplayHomeAsUpEnabled(true)
         //Récupération du compte sur lequel on est
         compte = intent.getParcelableExtra<Compte>(EXTRA_COMPTE)
 
@@ -83,6 +89,59 @@ class CompteDetailActivity() : AppCompatActivity(), OnClickListener, View.OnLong
         //Récupération du FAB et passage de l'action lors du clic
         val fab = findViewById<FloatingActionButton>(R.id.fabOperation)
         fab.setOnClickListener { OpenCreateOperation() }
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        menuInflater.inflate(R.menu.menu_detailcompte, menu)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when(item.itemId){
+            R.id.action_editCompte -> {
+                OpenEditCompte()
+            }
+            else -> return super.onOptionsItemSelected(item)
+        }
+        return super.onOptionsItemSelected(item)
+    }
+
+    private fun OpenEditCompte() {
+        val context = this
+        val builder = AlertDialog.Builder(context)
+        builder.setTitle("Modifier un Compte")
+
+        val view = layoutInflater.inflate(R.layout.activity_compte_create, null)
+        val nomCompte = view.findViewById<EditText>(R.id.saisieNomCompte)
+        //ne pas afficher le solde pour ne pas pouvoir le modifier
+        val soldeCompte = view.findViewById<EditText>(R.id.saisieSoldeCompte)
+        soldeCompte.visibility = View.INVISIBLE
+
+
+        val includedInBalance = view.findViewById<CheckBox>(R.id.saisieIncludedInBalance)
+        nomCompte.setText("${compte.nomCompte}")
+        soldeCompte.setText("${compte.solde.toString()}")
+        includedInBalance.isChecked = compte.includedInBalance == 1
+
+        builder.setView(view)
+
+        //Bouton Modifier
+        builder.setPositiveButton("Modifier") { _, _ ->
+            //Permet de modifier le compte
+            compte.nomCompte = nomCompte.text.toString()
+            compte.includedInBalance = if (includedInBalance.isChecked) 1 else 0
+
+            database.ModifierCompte(compte)
+
+            intent = Intent()
+            setResult(REQUEST_MaJ_SOLDE, intent)
+        }
+        //Bouton Annuler
+        builder.setNegativeButton(android.R.string.cancel) { dialog, _ ->
+            dialog.cancel()
+        }
+        builder.show()
+
     }
 
     private fun MaJListeOperations() {
@@ -330,7 +389,5 @@ class CompteDetailActivity() : AppCompatActivity(), OnClickListener, View.OnLong
             Toast.makeText(this, "Erreur survenue lors de la suppression de l'opération", Toast.LENGTH_SHORT).show()
         }
     }
-
-
 }
 

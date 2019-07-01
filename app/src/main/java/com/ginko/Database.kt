@@ -207,6 +207,18 @@ class Database(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null
         )
         return id > 0
     }
+    fun ModifierCompte(compte: Compte): Boolean {
+        val values = ContentValues()
+        values.put(COMPTE_KEY_Name, compte.nomCompte)
+        values.put(COMPTE_KEY_IncludedInBalance, compte.includedInBalance)
+
+        val id = writableDatabase.update(
+            COMPTE_TABLE_NAME,
+            values,
+            COMPTE_KEY_ID + "=?", arrayOf(compte.idCompte.toString())
+        )
+        return id > 0
+    }
 
     //Supression d'une opération
     fun SupprimerOperation(operation: Operation): Boolean {

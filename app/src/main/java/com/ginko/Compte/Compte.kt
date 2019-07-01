@@ -10,7 +10,6 @@ data class Compte(var idCompte: Int, var nomCompte: String, var solde: Double, v
         parcel.readString(),
         parcel.readDouble(),
         parcel.readInt()
-
     ) {
     }
 
