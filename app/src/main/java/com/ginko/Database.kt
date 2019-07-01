@@ -61,7 +61,8 @@ private const val OPERATION_TABLE_CREATE = """
 private const val COMPTE_QUERY_SELECT_ALL = "SELECT * FROM $COMPTE_TABLE_NAME"
 
 //RECUPERATION DES COMPTES INCLUS DANS LA BALANCE
-private const val COMPTE_QUERY_SELECT_ONLYINCLUDEDINBALANCE = "SELECT * FROM $COMPTE_TABLE_NAME WHERE $COMPTE_KEY_IncludedInBalance = 1"
+private const val COMPTE_QUERY_SELECT_ONLYINCLUDEDINBALANCE =
+    "SELECT * FROM $COMPTE_TABLE_NAME WHERE $COMPTE_KEY_IncludedInBalance = 1"
 
 //RECUPERATION DE TOUTES LES OPERATIONS
 private const val OPERATION_QUERY_SELECT_ALL = "SELECT * FROM $OPERATION_TABLE_NAME"
@@ -93,7 +94,7 @@ class Database(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null
         val values = ContentValues()
         values.put(COMPTE_KEY_Name, compte.nomCompte)
         values.put(COMPTE_KEY_Solde, compte.solde)
-        values.put(COMPTE_KEY_IncludedInBalance,compte.includedInBalance)
+        values.put(COMPTE_KEY_IncludedInBalance, compte.includedInBalance)
 
         val id = writableDatabase.insert(COMPTE_TABLE_NAME, null, values)
         compte.idCompte = id.toInt()
@@ -161,7 +162,10 @@ class Database(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null
 
     fun getOperations(idCompte: Int): MutableList<Operation> {
         var operations = mutableListOf<Operation>()
-        readableDatabase.rawQuery(OPERATION_QUERY_SELECT_ALL + " WHERE ${OPERATION_KEY_IdCompte} = $idCompte ORDER BY ${OPERATION_KEY_Date} DESC", null)
+        readableDatabase.rawQuery(
+            OPERATION_QUERY_SELECT_ALL + " WHERE ${OPERATION_KEY_IdCompte} = $idCompte ORDER BY ${OPERATION_KEY_Date} DESC",
+            null
+        )
             .use { cursor ->
                 while (cursor.moveToNext()) {
                     val operation = Operation(
@@ -190,6 +194,7 @@ class Database(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null
         return id > 0
     }
 
+    //Modification d'une opération
     fun ModifierOperation(operation: Operation): Boolean {
         val values = ContentValues()
         values.put(OPERATION_KEY_Libelle, operation.libelleOperation)
@@ -198,16 +203,42 @@ class Database(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null
         val id = writableDatabase.update(
             OPERATION_TABLE_NAME,
             values,
-            OPERATION_KEY_ID + "=?", arrayOf(operation.idOperation.toString()))
+            OPERATION_KEY_ID + "=?", arrayOf(operation.idOperation.toString())
+        )
         return id > 0
     }
 
-    fun SupprimerOperation(operation: Operation, compte: Compte): Boolean{
+    //Supression d'une opération
+    fun SupprimerOperation(operation: Operation): Boolean {
 
-        val nombreDelete = writableDatabase.delete(OPERATION_TABLE_NAME,
+        val nombreDelete = writableDatabase.delete(
+            OPERATION_TABLE_NAME,
             "$OPERATION_KEY_ID = ?"
-            ,arrayOf(operation.idOperation.toString()))
+            , arrayOf(operation.idOperation.toString())
+        )
         return nombreDelete == 1
+    }
+
+    //Supression d'un compte
+    fun SupprimerCompte(compte: Compte): Boolean {
+
+        val nombreDelete = writableDatabase.delete(
+            COMPTE_TABLE_NAME,
+            "$COMPTE_KEY_ID = ?"
+            , arrayOf(compte.idCompte.toString())
+        )
+        return nombreDelete == 1
+    }
+
+    fun SupprimerOperationsCompte(compte: Compte): Boolean {
+        val listeOperation = getOperations(compte.idCompte)
+        val nombreDelete = writableDatabase.delete(
+            OPERATION_TABLE_NAME,
+            "$OPERATION_KEY_IdCompte = ?"
+            , arrayOf(compte.idCompte.toString())
+        )
+
+        return nombreDelete == listeOperation.count()
     }
 
 

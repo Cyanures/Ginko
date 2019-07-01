@@ -12,7 +12,11 @@ import com.ginko.R
 import java.sql.Date
 import java.text.SimpleDateFormat
 
-class OperationAdapter(val operations: List<Operation>, val itemLongClickListener: View.OnLongClickListener?, val itemClickListener: View.OnClickListener?) :
+class OperationAdapter(
+    val operations: List<Operation>,
+    val itemLongClickListener: View.OnLongClickListener?,
+    val itemClickListener: View.OnClickListener?
+) :
     RecyclerView.Adapter<OperationAdapter.ViewHolder>() {
     class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
@@ -33,7 +37,7 @@ class OperationAdapter(val operations: List<Operation>, val itemLongClickListene
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val operation = operations[position]
         holder.cardViewOperation.setOnLongClickListener(itemLongClickListener)
-        holder.cardViewOperation.setOnClickListener(itemClickListener )
+        holder.cardViewOperation.setOnClickListener(itemClickListener)
         holder.cardViewOperation.tag = position
 
         holder.nomOperation.text = operation.libelleOperation
@@ -42,9 +46,8 @@ class OperationAdapter(val operations: List<Operation>, val itemLongClickListene
         //Mise en forme d'une opération (vert si montant positif et rouge si montant négatif)
         if (holder.montantOperation.text.toString().toDouble() > 0) {
             holder.montantOperation.setTextColor(Color.parseColor("#2bbf38"))
-            holder.montantOperation.setText(String.format("%.2f", operation.montantOperation) +" €")
-        }
-        else {
+            holder.montantOperation.setText(String.format("%.2f", operation.montantOperation) + " €")
+        } else {
             holder.montantOperation.setTextColor(Color.parseColor("#d62f2f"))
             holder.montantOperation.setText("${operation.montantOperation} €")
         }

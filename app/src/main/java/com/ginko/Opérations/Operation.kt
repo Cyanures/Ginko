@@ -5,7 +5,13 @@ import android.os.Parcelable
 import java.text.DateFormat
 import java.util.*
 
-data class Operation(var idOperation:Int, var libelleOperation:String, var montantOperation:Double, var dateOperation: Long, var idCompte:Int) : Parcelable {
+data class Operation(
+    var idOperation: Int,
+    var libelleOperation: String,
+    var montantOperation: Double,
+    var dateOperation: Long,
+    var idCompte: Int
+) : Parcelable {
     constructor(parcel: Parcel) : this(
         parcel.readInt(),
         parcel.readString(),
@@ -15,7 +21,13 @@ data class Operation(var idOperation:Int, var libelleOperation:String, var monta
     ) {
     }
 
-    constructor(libelleOperation: String, montantOperation: Double,dateOperation: Long, idCompte: Int) : this(-1,libelleOperation,montantOperation,dateOperation,idCompte)
+    constructor(libelleOperation: String, montantOperation: Double, dateOperation: Long, idCompte: Int) : this(
+        -1,
+        libelleOperation,
+        montantOperation,
+        dateOperation,
+        idCompte
+    )
 
     override fun writeToParcel(parcel: Parcel, flags: Int) {
         parcel.writeInt(idOperation)

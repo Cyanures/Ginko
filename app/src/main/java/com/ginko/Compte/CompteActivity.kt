@@ -1,9 +1,12 @@
 package com.ginko.Compte
 
+import android.annotation.TargetApi
 import android.app.Activity
 import android.content.Intent
+import android.os.Build
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
+import android.support.annotation.RequiresApi
 import android.util.Log
 import com.ginko.R
 import android.support.design.widget.FloatingActionButton
@@ -16,6 +19,7 @@ import android.widget.EditText
 import android.widget.Toast
 import com.ginko.App
 import com.ginko.Database
+import kotlinx.android.synthetic.main.activity_compte_create.*
 import kotlinx.android.synthetic.main.activity_main.*
 
 class CompteActivity : AppCompatActivity(), View.OnClickListener, View.OnLongClickListener {
@@ -51,9 +55,10 @@ class CompteActivity : AppCompatActivity(), View.OnClickListener, View.OnLongCli
     }
 
     //Sur un clic Long, demande si on souhaite supprimer un compte
-    override fun onLongClick(v: View?): Boolean {
-        //Popup de demande de suppression du compte sur un clic long (on supprime aussi toutes les OP avec cet idCompte
-        Toast.makeText(this,"Long click sur un compte", Toast.LENGTH_SHORT).show()
+    @TargetApi(Build.VERSION_CODES.O)
+    @RequiresApi(Build.VERSION_CODES.O)
+    override fun onLongClick(view: View): Boolean {
+        OpenDeleteCompte(view.tag as Int)
         return true
     }
 
@@ -78,6 +83,7 @@ class CompteActivity : AppCompatActivity(), View.OnClickListener, View.OnLongCli
 
         val view = layoutInflater.inflate(R.layout.activity_compte_create, null)
 
+
         val saisieNomCompte = view.findViewById<EditText>(R.id.saisieNomCompte)
         val saisieSoldeCompte = view.findViewById<EditText>(R.id.saisieSoldeCompte)
         val includedInBalance = view.findViewById<CheckBox>(R.id.saisieIncludedInBalance)
@@ -85,7 +91,7 @@ class CompteActivity : AppCompatActivity(), View.OnClickListener, View.OnLongCli
 
         builder.setView(view);
 
-        // set up the ok button
+        // boutton ok
         builder.setPositiveButton(android.R.string.ok) { _, _ ->
             val nomCompteSaisi = saisieNomCompte.text.toString()
             val soldeCompteSaisi = saisieSoldeCompte.text.toString()
@@ -102,7 +108,7 @@ class CompteActivity : AppCompatActivity(), View.OnClickListener, View.OnLongCli
 
         }
 
-
+        //boutton annuler
         builder.setNegativeButton(android.R.string.cancel) { dialog, _ ->
             dialog.cancel()
         }
@@ -119,12 +125,12 @@ class CompteActivity : AppCompatActivity(), View.OnClickListener, View.OnLongCli
 
     private fun MaJBalanceAccueil() {
         var comptesBalance = mutableListOf<Compte>()
-         comptesBalance= database.getComptesIncludedInBalance()
-        var balance:Double = 0.00
-        for(compte:Compte in comptesBalance){
+        comptesBalance = database.getComptesIncludedInBalance()
+        var balance: Double = 0.00
+        for (compte: Compte in comptesBalance) {
             balance += compte.solde
         }
-        Balance.setText(String.format("%.2f", balance) +" €")
+        Balance.setText(String.format("%.2f", balance) + " €")
     }
 
     fun AfficherDetailCompte(compteIndex: Int) {
@@ -132,7 +138,7 @@ class CompteActivity : AppCompatActivity(), View.OnClickListener, View.OnLongCli
 
         val intent = Intent(this, CompteDetailActivity::class.java)
         intent.putExtra(CompteDetailActivity.EXTRA_COMPTE, compte)
-        startActivityForResult(intent,CompteDetailActivity.REQUEST_MaJ_SOLDE)
+        startActivityForResult(intent, CompteDetailActivity.REQUEST_MaJ_SOLDE)
     }
 
 
@@ -142,6 +148,43 @@ class CompteActivity : AppCompatActivity(), View.OnClickListener, View.OnLongCli
             MaJBalanceAccueil()
         } else {
             Toast.makeText(this, "Erreur survenue lors de la creation du compte", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    //Affichage de la modale de suppresion d'une opération
+    @RequiresApi(Build.VERSION_CODES.O)
+    private fun OpenDeleteCompte(position: Int) {
+        val compte = comptes[position]
+        val context = this
+        val builder = AlertDialog.Builder(context)
+        builder.setTitle("Supprimer un Compte")
+        builder.setMessage(
+            "Êtes-vous sûr de vouloir supprimer \n " +
+                    "le compte ${compte.nomCompte} ayant un solde de ${compte.solde} € ?"
+        )
+        builder.create()
+
+        //Bouton Supprimer
+        builder.setPositiveButton("Supprimer") { _, _ ->
+
+            SupprimerCompte(position)
+            MaJCompteAccueil()
+            MaJBalanceAccueil()
+        }
+        //Bouton Annuler
+        builder.setNegativeButton(android.R.string.cancel) { dialog, _ ->
+            dialog.cancel()
+        }
+        builder.show()
+    }
+
+    private fun SupprimerCompte(position: Int) {
+        val compte = comptes[position]
+        if (database.SupprimerOperationsCompte(compte) && database.SupprimerCompte(compte)) {
+            comptes.remove(compte)
+            Toast.makeText(this, "Compte supprimé avec succès", Toast.LENGTH_SHORT).show()
+        } else {
+            Toast.makeText(this, "Erreur survenue lors de la suppression du compte", Toast.LENGTH_SHORT).show()
         }
     }
 

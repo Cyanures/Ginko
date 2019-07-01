@@ -1,6 +1,7 @@
 package com.ginko.Compte
 
 import android.annotation.SuppressLint
+import android.annotation.TargetApi
 import android.app.DatePickerDialog
 import android.content.Intent
 import android.graphics.Color
@@ -23,6 +24,9 @@ import com.ginko.R
 import com.ginko.Database as Database
 import com.ginko.Compte.CompteActivity
 import android.icu.util.TimeZone
+import android.support.v7.view.ActionMode
+import android.view.Menu
+import android.view.MenuItem
 import android.view.View.OnClickListener
 import android.widget.*
 import com.ginko.Opérations.TextViewDatePicker
@@ -32,11 +36,10 @@ import java.sql.Timestamp
 import java.text.SimpleDateFormat
 import java.time.format.DateTimeFormatter
 import java.util.*
+import javax.security.auth.callback.Callback
 
 
-@Suppress("UNREACHABLE_CODE")
 class CompteDetailActivity() : AppCompatActivity(), OnClickListener, View.OnLongClickListener {
-
     companion object {
         val REQUEST_MaJ_SOLDE = 1
         val EXTRA_COMPTE = "compte"
@@ -49,10 +52,12 @@ class CompteDetailActivity() : AppCompatActivity(), OnClickListener, View.OnLong
     private lateinit var compteDetail: TextView
     private lateinit var soldeDetail: TextView
 
-    override fun onLongClick(v: View?): Boolean {
+
+    @TargetApi(Build.VERSION_CODES.O)
+    @RequiresApi(Build.VERSION_CODES.M)
+    override fun onLongClick(view: View): Boolean {
         //Sur un clic long, proposer de supprimer l'operation (modale --> "êtes-vous sûr de vouloir supprimer l'opération ??"
-        Toast.makeText(this,"Long Click on item",Toast.LENGTH_SHORT).show()
-        Log.i("LongClick","Long Click on item")
+        OpenDeleteOperation(view.tag as Int)
         return true
     }
 
@@ -82,7 +87,7 @@ class CompteDetailActivity() : AppCompatActivity(), OnClickListener, View.OnLong
 
     private fun MaJListeOperations() {
         operations = database.getOperations(compte.idCompte)
-        adapter = OperationAdapter(operations, this,this)
+        adapter = OperationAdapter(operations, this, this)
         val recyclerView = findViewById<RecyclerView>(R.id.OperationRecyclerView)
         recyclerView.layoutManager = LinearLayoutManager(this)
         recyclerView.adapter = adapter
@@ -94,36 +99,40 @@ class CompteDetailActivity() : AppCompatActivity(), OnClickListener, View.OnLong
         soldeDetail.text = compte.solde.toString()
 
         //rafraichissement de la couleur du solde si celui-ci change après l'affectation d'une recette ou d'une dépense
-       if(soldeDetail.text.toString().toDouble() > 0){
-           soldeDetail.setTextColor(Color.parseColor("#2bbf38"))
-           soldeDetail.setText(String.format("%.2f", compte.solde) +" €")
+        if (soldeDetail.text.toString().toDouble() > 0) {
+            soldeDetail.setTextColor(Color.parseColor("#2bbf38"))
+            soldeDetail.setText(String.format("%.2f", compte.solde) + " €")
 
-        }
-        else{
+        } else {
             soldeDetail.setTextColor(Color.parseColor("#d62f2f"))
-            soldeDetail.setText(String.format("%.2f", compte.solde) +" €")
+            soldeDetail.setText(String.format("%.2f", compte.solde) + " €")
         }
     }
 
     //Récupération et mise à jour du solde + affichage d'un toast sur l'opération ajoutée
-    fun mAjSolde(operation: Operation) {
-        compte.solde += operation.montantOperation
-        if (database.AffecterOperation(compte)) {
-            if (operation.montantOperation > 0) {
-                Toast.makeText(this, "Recette ajoutée avec succès", Toast.LENGTH_SHORT).show()
-            } else {
-                Toast.makeText(this, "Dépense ajoutée avec succès", Toast.LENGTH_SHORT).show()
-            }
+    fun mAjSolde(operation: Operation, raison: String) {
+        if (raison == "Ajouter" || raison == "Modifier") {
+            compte.solde += operation.montantOperation
+            if (database.AffecterOperation(compte)) {
+                if (operation.montantOperation > 0) {
+                    Toast.makeText(this, "Recette ajoutée avec succès", Toast.LENGTH_SHORT).show()
+                } else {
+                    Toast.makeText(this, "Dépense ajoutée avec succès", Toast.LENGTH_SHORT).show()
+                }
 
-        } else {
-            if (operation.montantOperation > 0) {
-                Toast.makeText(this, "Erreur survenue lors de l'ajout de la recette", Toast.LENGTH_SHORT).show()
             } else {
-                Toast.makeText(this, "Erreur survenue lors de l'ajout de la dépense", Toast.LENGTH_SHORT).show()
+                if (operation.montantOperation > 0) {
+                    Toast.makeText(this, "Erreur survenue lors de l'ajout de la recette", Toast.LENGTH_SHORT).show()
+                } else {
+                    Toast.makeText(this, "Erreur survenue lors de l'ajout de la dépense", Toast.LENGTH_SHORT).show()
+                }
             }
+        } else if (raison == "Supprimer") {
+            compte.solde -= operation.montantOperation
+            database.AffecterOperation(compte)
         }
 
-        findViewById<TextView>(com.ginko.R.id.soldeCompteDetail).setText(String.format("%.2f", compte.solde) +" €")
+        findViewById<TextView>(R.id.soldeCompteDetail).setText(String.format("%.2f", compte.solde) + " €")
         intent = Intent()
         setResult(RESULT_OK, intent)
     }
@@ -135,12 +144,12 @@ class CompteDetailActivity() : AppCompatActivity(), OnClickListener, View.OnLong
         val builder = AlertDialog.Builder(context)
         builder.setTitle("Ajouter une Opération")
 
-        val view = layoutInflater.inflate(R.layout.activity_operation_create,null)
+        val view = layoutInflater.inflate(R.layout.activity_operation_create, null)
 
         val saisieLibOperation = view.findViewById<EditText>(R.id.saisieLibOperation)
         val saisieMontantOperation = view.findViewById<EditText>(R.id.saisieMontantOperation)
         val saisieDate = view.findViewById<EditText>(R.id.saisieDate)
-        TextViewDatePicker(context,saisieDate)
+        TextViewDatePicker(context, saisieDate)
 
         val depense = view.findViewById<RadioButton>(R.id.checkboxDepense)
         val recette = view.findViewById<RadioButton>(R.id.checkboxRecette)
@@ -163,12 +172,13 @@ class CompteDetailActivity() : AppCompatActivity(), OnClickListener, View.OnLong
                     "Creation Operation",
                     "Operation cree $libOperationSaisie montant : $montantOperationSaisie sur le compte ${compte.idCompte} date opération : $dateOperationSaisie"
                 )
-                if(depense.isChecked){
+                if (depense.isChecked) {
                     montantOperationSaisie = (-saisieMontantOperation.text.toString().toDouble()).toString()
                 }
-                val operation = Operation(libOperationSaisie,montantOperationSaisie.toDouble(),date.time, compte.idCompte)
+                val operation =
+                    Operation(libOperationSaisie, montantOperationSaisie.toDouble(), date.time, compte.idCompte)
                 saveOperation(operation)
-                mAjSolde(operation)
+                mAjSolde(operation, "Ajouter")
                 MaJListeOperations()
 
             }
@@ -195,24 +205,28 @@ class CompteDetailActivity() : AppCompatActivity(), OnClickListener, View.OnLong
     //Affichage de la modale de modification d'une opération
     @SuppressLint("SimpleDateFormat")
     @RequiresApi(Build.VERSION_CODES.O)
-    private fun OpenModifOperation(position:Int) {
+    private fun OpenModifOperation(position: Int) {
 
         val operation = operations[position]
-        val ancienneoperation = Operation(operation.libelleOperation,operation.montantOperation,operation.dateOperation,operation.idCompte)
+        val ancienneoperation = Operation(
+            operation.libelleOperation,
+            operation.montantOperation,
+            operation.dateOperation,
+            operation.idCompte
+        )
         val context = this
         val builder = AlertDialog.Builder(context)
         builder.setTitle("Modifier une Opération")
 
-        val view = layoutInflater.inflate(R.layout.activity_operation_create,null)
+        val view = layoutInflater.inflate(R.layout.activity_operation_create, null)
         val checkboxDepense = view.findViewById<RadioButton>(R.id.checkboxDepense)
         val checkboxRecette = view.findViewById<RadioButton>(R.id.checkboxRecette)
         val saisieLibOperation = view.findViewById<EditText>(R.id.saisieLibOperation)
         saisieLibOperation.setText(operation.libelleOperation)
-        if(operation.montantOperation < 0){
+        if (operation.montantOperation < 0) {
             operation.montantOperation = -operation.montantOperation
             checkboxDepense.isChecked = true
-        }
-        else{
+        } else {
             checkboxRecette.isChecked = true
         }
         val saisieMontantOperation = view.findViewById<EditText>(R.id.saisieMontantOperation)
@@ -220,14 +234,14 @@ class CompteDetailActivity() : AppCompatActivity(), OnClickListener, View.OnLong
 
         val saisieDate = view.findViewById<EditText>(R.id.saisieDate)
         saisieDate.setText(SimpleDateFormat("dd-MM-yyyy").format(Date(operation.dateOperation)).toString())
-        TextViewDatePicker(context,saisieDate)
+        TextViewDatePicker(context, saisieDate)
 
         builder.setView(view)
 
         //Bouton Modifier
         builder.setPositiveButton("Modifier") { _, _ ->
             //Permet de supprimer l'ancien montant afin d'affecter seulement le nouveau montant
-            compte.solde +=(ancienneoperation.montantOperation*-1)
+            compte.solde += (ancienneoperation.montantOperation * -1)
 
             val idOperation = operation.idOperation
             val libOperationSaisie = saisieLibOperation.text.toString()
@@ -236,7 +250,7 @@ class CompteDetailActivity() : AppCompatActivity(), OnClickListener, View.OnLong
             val date = SimpleDateFormat("dd-MM-yyyy").parse(dateOperationSaisie)
 
             //Ajouter le controle sur les dates
-            if (libOperationSaisie == "" || montantOperationSaisie == "")  {
+            if (libOperationSaisie == "" || montantOperationSaisie == "") {
                 Toast.makeText(this, "Impossible de créer une opération sans montant ou libelle", Toast.LENGTH_LONG)
                     .show()
             } else {
@@ -244,12 +258,18 @@ class CompteDetailActivity() : AppCompatActivity(), OnClickListener, View.OnLong
                     "Creation Operation",
                     "Operation cree $libOperationSaisie montant : $montantOperationSaisie sur le compte ${compte.idCompte} date opération : $dateOperationSaisie"
                 )
-                if(checkboxDepense.isChecked){
+                if (checkboxDepense.isChecked) {
                     montantOperationSaisie = (-saisieMontantOperation.text.toString().toDouble()).toString()
                 }
-                val operation = Operation(idOperation,libOperationSaisie,montantOperationSaisie.toDouble(),date.time, compte.idCompte)
+                val operation = Operation(
+                    idOperation,
+                    libOperationSaisie,
+                    montantOperationSaisie.toDouble(),
+                    date.time,
+                    compte.idCompte
+                )
                 ModifOperation(operation, position)
-                mAjSolde(operation)
+                mAjSolde(operation, "Modifier")
                 MaJListeOperations()
 
             }
@@ -273,6 +293,43 @@ class CompteDetailActivity() : AppCompatActivity(), OnClickListener, View.OnLong
     }
 
 
+    //Affichage de la modale de suppresion d'une opération
+    @RequiresApi(Build.VERSION_CODES.O)
+    private fun OpenDeleteOperation(position: Int) {
+        val operation = operations[position]
+        val context = this
+        val builder = AlertDialog.Builder(context)
+        builder.setTitle("Supprimer une Opération")
+        builder.setMessage(
+            "Êtes-vous sûr de vouloir supprimer \n " +
+                    "l'operation ${operation.libelleOperation} d'un montant de ${operation.montantOperation} € ?"
+        )
+        builder.create()
+
+        //Bouton Supprimer
+        builder.setPositiveButton("Supprimer") { _, _ ->
+
+            SupprimerOperation(position)
+            MaJListeOperations()
+        }
+        //Bouton Annuler
+        builder.setNegativeButton(android.R.string.cancel) { dialog, _ ->
+            dialog.cancel()
+        }
+        builder.show()
+    }
+
+
+    private fun SupprimerOperation(position: Int) {
+        val operation = operations[position]
+        if (database.SupprimerOperation(operation)) {
+            mAjSolde(operation, "Supprimer")
+            operations.remove(operation)
+            Toast.makeText(this, "Opération supprimée avec succès", Toast.LENGTH_SHORT).show()
+        } else {
+            Toast.makeText(this, "Erreur survenue lors de la suppression de l'opération", Toast.LENGTH_SHORT).show()
+        }
+    }
 
 
 }
