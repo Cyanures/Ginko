@@ -2,14 +2,11 @@ package com.ginko.Compte
 
 import android.annotation.SuppressLint
 import android.annotation.TargetApi
-import android.app.DatePickerDialog
 import android.content.Intent
 import android.graphics.Color
-import android.icu.util.Calendar
 import android.os.Build
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
-import android.os.Parcel
 import android.support.annotation.RequiresApi
 import android.support.design.widget.FloatingActionButton
 import android.support.v7.app.AlertDialog
@@ -22,22 +19,15 @@ import com.ginko.Opérations.Operation
 import com.ginko.Opérations.OperationAdapter
 import com.ginko.R
 import com.ginko.Database as Database
-import com.ginko.Compte.CompteActivity
-import android.icu.util.TimeZone
-import android.support.v7.view.ActionMode
 import android.support.v7.widget.Toolbar
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View.OnClickListener
 import android.widget.*
 import com.ginko.Opérations.TextViewDatePicker
-import kotlinx.android.synthetic.main.activity_operation_create.*
+import kotlinx.android.synthetic.main.activity_compte_detail.*
 import java.sql.Date
-import java.sql.Timestamp
 import java.text.SimpleDateFormat
-import java.time.format.DateTimeFormatter
-import java.util.*
-import javax.security.auth.callback.Callback
 
 
 class CompteDetailActivity() : AppCompatActivity(), OnClickListener, View.OnLongClickListener {
@@ -130,9 +120,11 @@ class CompteDetailActivity() : AppCompatActivity(), OnClickListener, View.OnLong
             //Permet de modifier le compte
             compte.nomCompte = nomCompte.text.toString()
             compte.includedInBalance = if (includedInBalance.isChecked) 1 else 0
-
-            database.ModifierCompte(compte)
-
+            //si le compte est modifié en BDD on répercute le chengement de nom sur la page actuelle
+            if(database.ModifierCompte(compte)){
+                nomCompteDetail.setText("${compte.nomCompte}")
+            }
+            //on indique à compteActivity qu'une modification a été effectuée et il faut qu'il mette à jour le solde de la balance
             intent = Intent()
             setResult(REQUEST_MaJ_SOLDE, intent)
         }
@@ -169,7 +161,7 @@ class CompteDetailActivity() : AppCompatActivity(), OnClickListener, View.OnLong
     }
 
     //Récupération et mise à jour du solde + affichage d'un toast sur l'opération ajoutée
-    fun mAjSolde(operation: Operation, raison: String) {
+    fun MaJSolde(operation: Operation, raison: String) {
         if (raison == "Ajouter" || raison == "Modifier") {
             compte.solde += operation.montantOperation
             if (database.AffecterOperation(compte)) {
@@ -237,7 +229,7 @@ class CompteDetailActivity() : AppCompatActivity(), OnClickListener, View.OnLong
                 val operation =
                     Operation(libOperationSaisie, montantOperationSaisie.toDouble(), date.time, compte.idCompte)
                 saveOperation(operation)
-                mAjSolde(operation, "Ajouter")
+                MaJSolde(operation, "Ajouter")
                 MaJListeOperations()
 
             }
@@ -328,7 +320,7 @@ class CompteDetailActivity() : AppCompatActivity(), OnClickListener, View.OnLong
                     compte.idCompte
                 )
                 ModifOperation(operation, position)
-                mAjSolde(operation, "Modifier")
+                MaJSolde(operation, "Modifier")
                 MaJListeOperations()
 
             }
@@ -382,7 +374,7 @@ class CompteDetailActivity() : AppCompatActivity(), OnClickListener, View.OnLong
     private fun SupprimerOperation(position: Int) {
         val operation = operations[position]
         if (database.SupprimerOperation(operation)) {
-            mAjSolde(operation, "Supprimer")
+            MaJSolde(operation, "Supprimer")
             operations.remove(operation)
             Toast.makeText(this, "Opération supprimée avec succès", Toast.LENGTH_SHORT).show()
         } else {
