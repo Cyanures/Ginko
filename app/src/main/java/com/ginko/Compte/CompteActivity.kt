@@ -34,6 +34,7 @@ class CompteActivity : AppCompatActivity(), View.OnClickListener, View.OnLongCli
 
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        //On récupere notre classe Database
         database = App.database
 
         //initialisation des comptes de la page d'acceuil
@@ -45,6 +46,25 @@ class CompteActivity : AppCompatActivity(), View.OnClickListener, View.OnLongCli
         fab.setOnClickListener { OpenCreateCompte() }
 
     }
+    //on mets à jour la liste des comptes affichés
+    private fun MaJCompteAccueil() {
+        comptes = database.getComptes()
+        adapter = CompteAdapter(comptes, this, this)
+        val recyclerView = findViewById<RecyclerView>(R.id.compteRecyclerView)
+        recyclerView.layoutManager = LinearLayoutManager(this)
+        recyclerView.adapter = adapter
+    }
+    //on met à jour la balance de l'accueil
+    private fun MaJBalanceAccueil() {
+        var comptesBalance = mutableListOf<Compte>()
+        comptesBalance = database.getComptesIncludedInBalance()
+        var balance: Double = 0.00
+        for (compte: Compte in comptesBalance) {
+            balance += compte.solde
+        }
+        Balance.setText(String.format("%.2f", balance) + " €")
+    }
+
 
 
     //Clic sur un compte, lance l'activity_compte_detail
@@ -53,19 +73,20 @@ class CompteActivity : AppCompatActivity(), View.OnClickListener, View.OnLongCli
             AfficherDetailCompte(view.tag as Int)
         }
     }
+    //on affiche le détail du compte cliqué
+    fun AfficherDetailCompte(compteIndex: Int) {
+        val compte = comptes[compteIndex]
 
-    //Sur un clic Long, demande si on souhaite supprimer un compte
-    @TargetApi(Build.VERSION_CODES.O)
-    @RequiresApi(Build.VERSION_CODES.O)
-    override fun onLongClick(view: View): Boolean {
-        OpenDeleteCompte(view.tag as Int)
-        return true
+        val intent = Intent(this, CompteDetailActivity::class.java)
+        //on passe le compte sur lequel on a cliqué en extra
+        intent.putExtra(CompteDetailActivity.EXTRA_COMPTE, compte)
+        startActivityForResult(intent, CompteDetailActivity.REQUEST_MaJ_SOLDE)
     }
 
 
     //Quand on reçoit un resultat de CompteDetailActivity (quand une operation est ajoutée)
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        if (resultCode != Activity.RESULT_OK || data == null) {
+        if (data == null) {
             return
         }
         when (requestCode) {
@@ -75,7 +96,7 @@ class CompteActivity : AppCompatActivity(), View.OnClickListener, View.OnLongCli
             }
         }
     }
-
+    //Ouverture de la modale de création d'un compte
     private fun OpenCreateCompte() {
         val context = this
         val builder = AlertDialog.Builder(context)
@@ -115,46 +136,32 @@ class CompteActivity : AppCompatActivity(), View.OnClickListener, View.OnLongCli
         builder.show()
     }
 
-    private fun MaJCompteAccueil() {
-        comptes = database.getComptes()
-        adapter = CompteAdapter(comptes, this, this)
-        val recyclerView = findViewById<RecyclerView>(R.id.compteRecyclerView)
-        recyclerView.layoutManager = LinearLayoutManager(this)
-        recyclerView.adapter = adapter
-    }
-
-    private fun MaJBalanceAccueil() {
-        var comptesBalance = mutableListOf<Compte>()
-        comptesBalance = database.getComptesIncludedInBalance()
-        var balance: Double = 0.00
-        for (compte: Compte in comptesBalance) {
-            balance += compte.solde
-        }
-        Balance.setText(String.format("%.2f", balance) + " €")
-    }
-
-    fun AfficherDetailCompte(compteIndex: Int) {
-        val compte = comptes[compteIndex]
-
-        val intent = Intent(this, CompteDetailActivity::class.java)
-        intent.putExtra(CompteDetailActivity.EXTRA_COMPTE, compte)
-        startActivityForResult(intent, CompteDetailActivity.REQUEST_MaJ_SOLDE)
-    }
-
-
     private fun saveCompte(compte: Compte) {
+        //si l'ajout en BDD a fonctionné on met à jour les comptes et la balance de l'accueil
         if (database.createCompte(compte)) {
-            comptes.add(compte)
+            MaJCompteAccueil()
             MaJBalanceAccueil()
+            Toast.makeText(this, "Création du compte effectué avec succès", Toast.LENGTH_SHORT).show()
         } else {
             Toast.makeText(this, "Erreur survenue lors de la creation du compte", Toast.LENGTH_SHORT).show()
         }
     }
 
+
+    //Sur un clic Long, demande si on souhaite supprimer un compte
+    @TargetApi(Build.VERSION_CODES.O)
+    @RequiresApi(Build.VERSION_CODES.O)
+    override fun onLongClick(view: View): Boolean {
+        OpenDeleteCompte(view.tag as Int)
+        return true
+    }
+
     //Affichage de la modale de suppresion d'une opération
     @RequiresApi(Build.VERSION_CODES.O)
     private fun OpenDeleteCompte(position: Int) {
+        //on recupere le compte sur lequel on as cliqué
         val compte = comptes[position]
+
         val context = this
         val builder = AlertDialog.Builder(context)
         builder.setTitle("Supprimer un Compte")
@@ -180,8 +187,10 @@ class CompteActivity : AppCompatActivity(), View.OnClickListener, View.OnLongCli
 
     private fun SupprimerCompte(position: Int) {
         val compte = comptes[position]
+        //si on a réussi à supprimer toutes les OP du compte et le compte alors on rafraichit les comptes et la balance sur l'accueil
         if (database.SupprimerOperationsCompte(compte) && database.SupprimerCompte(compte)) {
-            comptes.remove(compte)
+            MaJCompteAccueil()
+            MaJBalanceAccueil()
             Toast.makeText(this, "Compte supprimé avec succès", Toast.LENGTH_SHORT).show()
         } else {
             Toast.makeText(this, "Erreur survenue lors de la suppression du compte", Toast.LENGTH_SHORT).show()
