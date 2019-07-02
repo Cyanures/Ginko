@@ -9,7 +9,7 @@ import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.TimeZone
 
-class TextViewDatePicker @JvmOverloads constructor(
+class TextViewDatePicker constructor(
     private val mContext: Context,
     private val mView: TextView
 ) : View.OnClickListener, DatePickerDialog.OnDateSetListener {

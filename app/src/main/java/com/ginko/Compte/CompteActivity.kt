@@ -56,9 +56,8 @@ class CompteActivity : AppCompatActivity(), View.OnClickListener, View.OnLongCli
     }
     //on met à jour la balance de l'accueil
     private fun MaJBalanceAccueil() {
-        var comptesBalance = mutableListOf<Compte>()
-        comptesBalance = database.getComptesIncludedInBalance()
-        var balance: Double = 0.00
+        val comptesBalance = database.getComptesIncludedInBalance()
+        var balance = 0.00
         for (compte: Compte in comptesBalance) {
             balance += compte.solde
         }
@@ -110,7 +109,7 @@ class CompteActivity : AppCompatActivity(), View.OnClickListener, View.OnLongCli
         val includedInBalance = view.findViewById<CheckBox>(R.id.saisieIncludedInBalance)
 
 
-        builder.setView(view);
+        builder.setView(view)
 
         // boutton ok
         builder.setPositiveButton(android.R.string.ok) { _, _ ->

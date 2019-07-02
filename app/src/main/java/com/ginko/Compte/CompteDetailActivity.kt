@@ -203,7 +203,7 @@ class CompteDetailActivity() : AppCompatActivity(), OnClickListener, View.OnLong
         TextViewDatePicker(context, saisieDate)
 
         val depense = view.findViewById<RadioButton>(R.id.checkboxDepense)
-        val recette = view.findViewById<RadioButton>(R.id.checkboxRecette)
+
 
         builder.setView(view)
 
@@ -312,15 +312,15 @@ class CompteDetailActivity() : AppCompatActivity(), OnClickListener, View.OnLong
                 if (checkboxDepense.isChecked) {
                     montantOperationSaisie = (-saisieMontantOperation.text.toString().toDouble()).toString()
                 }
-                val operation = Operation(
+                val nouvelleOperation = Operation(
                     idOperation,
                     libOperationSaisie,
                     montantOperationSaisie.toDouble(),
                     date.time,
                     compte.idCompte
                 )
-                ModifOperation(operation, position)
-                MaJSolde(operation, "Modifier")
+                ModifOperation(nouvelleOperation, position)
+                MaJSolde(nouvelleOperation, "Modifier")
                 MaJListeOperations()
 
             }
