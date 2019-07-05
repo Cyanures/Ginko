@@ -68,7 +68,6 @@ class CompteDetailActivity() : AppCompatActivity(), OnClickListener, View.OnLong
         //Récupération de la toolbar
         val toolbar = findViewById<Toolbar>(R.id.ToolbarDetailCompte)
         setSupportActionBar(toolbar)
-        toolbar.setTitle("Détail d'un compte")
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
         //Récupération du compte sur lequel on est
         compte = intent.getParcelableExtra<Compte>(EXTRA_COMPTE)
